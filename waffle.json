@@ -1,0 +1,10 @@
+{
+    "compilerType": "solcjs",
+    "compilerVersion": "0.6.8",
+    "sourceDirectory": "./contracts",
+    "outputDirectory": "./artifacts",
+    "flattenOutputDirectory": "./flattened",
+    "outputHumanReadableAbi": true,
+    "typechainEnabled": true,
+    "typechainOutputDir": "./typechain"
+}

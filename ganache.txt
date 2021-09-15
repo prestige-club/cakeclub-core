@@ -1,0 +1,15 @@
+ganache-cli -s "game below same slow inspire large unit indoor few dad crystal bulk" -f https://bsc-dataseed.binance.org/ -i 19 --chainId 19 -u 0xe6b1b029feDe0F74787bcA48F730146f8713Cc88 -u 0xd46f7E32050f9B9A2416c9BB4E5b4296b890A911 -e 1000 --callGasLimit 15000000 --gasLimit 15000000
+
+ganache-cli -f https://bsc-dataseed.binance.org/ -i 19 --chainId 19 -u 0xd46f7E32050f9B9A2416c9BB4E5b4296b890A911 -e 1000 --callGasLimit 15000000 --gasLimit 15000000
+
+Plain:
+ganache-cli -i 19 --chainId 19 -u 0xd46f7E32050f9B9A2416c9BB4E5b4296b890A911 -e 1000 --callGasLimit 15000000 --gasLimit 15000000 --db ./chaindata -h 0.0.0.0 -m "game below same slow inspire large unit indoor few dad crystal bulk"
+
+With Automine:
+ganache-cli -i 19 --chainId 19 -u 0xd46f7E32050f9B9A2416c9BB4E5b4296b890A911 -e 1000 --callGasLimit 15000000 --gasLimit 15000000 --db ./chaindata -h 0.0.0.0 -m "game below same slow inspire large unit indoor few dad crystal bulk" -b 5
+
+ganache-cli -i 20 --chainId 20 -u 0xd46f7E32050f9B9A2416c9BB4E5b4296b890A911 -e 1000 --callGasLimit 15000000 --gasLimit 15000000 -h 0.0.0.0 -m "game below same slow inspire large unit indoor few dad crystal bulk" -f https://mainnet.infura.io/v3/a6ffe81db45d4f4091967cee2578920f
+
+
+
+ganache-cli -s "game below same slow inspire large unit indoor few dad crystal bulk" -f https://bsc-dataseed.binance.org/ -i 19 --chainId 19 -u 0xe6b1b029feDe0F74787bcA48F730146f8713Cc88 -u 0xd46f7E32050f9B9A2416c9BB4E5b4296b890A911 -e 1000 --callGasLimit 80000000 --gasLimit 80000000 -b 5
