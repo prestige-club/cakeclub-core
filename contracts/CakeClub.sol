@@ -14,14 +14,6 @@ interface CakeVault{
     function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
 }
 
-interface CakeVault2{ //TODO Remove, only used in tests
-    function deposit(uint256 _amount) external;
-    function withdraw(uint256 _shares) external;
-    function userInfo(address addr) external returns (uint256, uint256, uint256, uint256);
-    function getPricePerFullShare() external returns (uint256);
-    function token() external view returns (address);
-}
-
 interface IPrestigeClub{
     function depositSum() external view returns (uint128);
     function totalWithdrawn() external view returns (uint128);
