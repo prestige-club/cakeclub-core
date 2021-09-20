@@ -21,3 +21,4 @@ typechain
 
 secrets.json
 package-lock.json
+deployments/
