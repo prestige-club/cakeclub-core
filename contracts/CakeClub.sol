@@ -5,6 +5,7 @@ pragma solidity >=0.6.0 <0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./ICakeClub.sol";
 
 interface CakeVault{
     function cake() external view returns (address);
@@ -19,7 +20,7 @@ interface IPrestigeClub{
     function totalWithdrawn() external view returns (uint128);
 }
 
-contract CakeClub is Ownable(){
+contract CakeClub is Ownable(){ //, ICakeClub
 
     using SafeMath for uint256;
 

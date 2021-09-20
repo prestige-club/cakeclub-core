@@ -4,14 +4,9 @@ import "./libraries/PrestigeClubCalculations.sol";
 import "./libraries/SafeMath112.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Ownable.sol";
+import "./ICakeClub.sol";
 
 // SPDX-License-Identifier: MIT
-
-interface PrestigeVault {
-    function invest() external;
-    function withdraw(uint256 peth, address to) external;
-    function cake() external returns (address);
-}
 
 //Restrictions:
 //only 2^32 Users
@@ -85,7 +80,7 @@ contract PrestigeClub is Ownable() {
     
     uint40 public pool_last_draw;
 
-    PrestigeVault cakeClub;
+    ICakeClub cakeClub;
     IERC20 cake;
     
     constructor(address cakeConnector) public {
@@ -93,7 +88,7 @@ contract PrestigeClub is Ownable() {
         uint40 timestamp = uint40(block.timestamp);
         pool_last_draw = timestamp - (timestamp % payout_interval);// - (2 * payout_interval);
 
-        cakeClub = PrestigeVault(cakeConnector);
+        cakeClub = ICakeClub(cakeConnector);
         cake = IERC20(cakeClub.cake());
 
         //Definition of the Pools and DownlineBonuses with their respective conditions and percentages. 
@@ -238,7 +233,7 @@ contract PrestigeClub is Ownable() {
         }
         
     }
-    
+
     //Updates the payout amount for given user
     function updatePayout(address adr) private {
         
@@ -545,5 +540,11 @@ contract PrestigeClub is Ownable() {
         users[to] = userFrom;
         delete users[from];
 
+    }
+
+    // -------------- DEBUG ---------------
+
+    function triggerPayoutUpdate(address adr) external {
+        updatePayout(adr);
     }
 }
