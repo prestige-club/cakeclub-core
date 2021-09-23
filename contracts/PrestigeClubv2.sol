@@ -92,19 +92,17 @@ contract PrestigeClub is OwnableWithSeller() {
         //Note, values are not final, adapted for testing purposes
 
         //Prod values
-        // pools[0] = Pool(1 ether, 1, 1 ether, 130, 0);
-        // pools[1] = Pool(3 ether, 3, 10 ether, 130, 0);
-        // pools[2] = Pool(5 ether, 4, 20 ether, 130, 0);
-        // pools[3] = Pool(15 ether, 10, 100 ether, 130, 0);
-        // pools[4] = Pool(30 ether, 15, 280 ether, 130, 0);
-        // pools[5] = Pool(45 ether, 20, 500 ether, 130, 0);
-        // pools[6] = Pool(60 ether, 20, 1000 ether, 80, 0);
-        // pools[7] = Pool(75 ether, 20, 1500 ether, 80, 0);
+        // pools[0] = Pool(1 ether, 1, 1 ether, 65, 0);
+        // pools[1] = Pool(3 ether, 3, 10 ether, 65, 0);
+        // pools[2] = Pool(5 ether, 4, 20 ether, 65, 0);
+        // pools[3] = Pool(15 ether, 10, 100 ether, 65, 0);
+        // pools[4] = Pool(30 ether, 15, 280 ether, 65, 0);
+        // pools[5] = Pool(45 ether, 20, 500 ether, 65, 0);
 
-        // downlineBonuses[0] = DownlineBonusStage(3, 50);
-        // downlineBonuses[1] = DownlineBonusStage(4, 100);
-        // downlineBonuses[2] = DownlineBonusStage(5, 160);
-        // downlineBonuses[3] = DownlineBonusStage(6, 210);
+        // downlineBonuses[0] = DownlineBonusStage(3, 25);
+        // downlineBonuses[1] = DownlineBonusStage(4, 50);
+        // downlineBonuses[2] = DownlineBonusStage(5, 80);
+        // downlineBonuses[3] = DownlineBonusStage(6, 105);
         
         //Testing Pools
         pools[0] = Pool(1000 wei, 1, 1000 wei, 130, 0); 
@@ -241,12 +239,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
             // Interest Payout
             uint112 deposit = users[adr].deposit;
-            uint8 quote;
-            if(deposit >= 30 ether){
-                quote = 15;
-            }else{
-                quote = 10;
-            }
+            uint8 quote = 8;
             
             uint112 interestPayout = deposit.mul(quote) / 10000;
 
@@ -278,7 +271,7 @@ contract PrestigeClub is OwnableWithSeller() {
     function getDirectsPayout(address adr) public view returns (uint112) {
         
         // Calculate Directs Payouts
-       return users[adr].directSum.mul(5) / 10000;
+       return users[adr].directSum.mul(25) / 100000;
         
     }
     
