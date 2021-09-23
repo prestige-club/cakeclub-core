@@ -82,10 +82,6 @@ library PrestigeClubCalculations {
 
             }
 
-            if(downlineBonus == 4){
-                downlinePayout = downlinePayout.add(user.downlineVolumes[4].mul(50) / 1000000);
-            }
-
         }
         return downlinePayout;
     }
