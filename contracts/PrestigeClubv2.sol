@@ -3,7 +3,7 @@ pragma solidity >=0.6.0 <0.8.0;
 import "./libraries/PrestigeClubCalculations.sol";
 import "./libraries/SafeMath112.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./Ownable.sol";
+import "./OwnableWithSeller.sol";
 import "./ICakeClub.sol";
 
 // SPDX-License-Identifier: MIT
@@ -11,7 +11,7 @@ import "./ICakeClub.sol";
 //Restrictions:
 //only 2^32 Users
 //Maximum of (2^104 / 10^18 Ether) investment. Theoretically 20 Trl Ether, practically 100000000000 Ether compiles
-contract PrestigeClub is Ownable() {
+contract PrestigeClub is OwnableWithSeller() {
 
     using SafeMath112 for uint112;
 
@@ -95,42 +95,42 @@ contract PrestigeClub is Ownable() {
         //Note, values are not final, adapted for testing purposes
 
         //Prod values
-        pools[0] = Pool(1 ether, 1, 1 ether, 130, 0);
-        pools[1] = Pool(3 ether, 3, 10 ether, 130, 0);
-        pools[2] = Pool(5 ether, 4, 20 ether, 130, 0);
-        pools[3] = Pool(15 ether, 10, 100 ether, 130, 0);
-        pools[4] = Pool(30 ether, 15, 280 ether, 130, 0);
-        pools[5] = Pool(45 ether, 20, 500 ether, 130, 0);
-        pools[6] = Pool(60 ether, 20, 1000 ether, 80, 0);
-        pools[7] = Pool(75 ether, 20, 1500 ether, 80, 0);
+        // pools[0] = Pool(1 ether, 1, 1 ether, 130, 0);
+        // pools[1] = Pool(3 ether, 3, 10 ether, 130, 0);
+        // pools[2] = Pool(5 ether, 4, 20 ether, 130, 0);
+        // pools[3] = Pool(15 ether, 10, 100 ether, 130, 0);
+        // pools[4] = Pool(30 ether, 15, 280 ether, 130, 0);
+        // pools[5] = Pool(45 ether, 20, 500 ether, 130, 0);
+        // pools[6] = Pool(60 ether, 20, 1000 ether, 80, 0);
+        // pools[7] = Pool(75 ether, 20, 1500 ether, 80, 0);
 
-        downlineBonuses[0] = DownlineBonusStage(3, 50);
-        downlineBonuses[1] = DownlineBonusStage(4, 100);
-        downlineBonuses[2] = DownlineBonusStage(5, 160);
-        downlineBonuses[3] = DownlineBonusStage(6, 210);
+        // downlineBonuses[0] = DownlineBonusStage(3, 50);
+        // downlineBonuses[1] = DownlineBonusStage(4, 100);
+        // downlineBonuses[2] = DownlineBonusStage(5, 160);
+        // downlineBonuses[3] = DownlineBonusStage(6, 210);
         
         //Testing Pools
-        // pools[0] = Pool(1000 wei, 1, 1000 wei, 130, 0); 
-        // pools[1] = Pool(1000 wei, 1, 1000 wei, 130, 0);
-        // pools[2] = Pool(1000 wei, 1, 10000 wei, 130, 0);
-        // pools[3] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        // pools[4] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        // pools[5] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        // pools[6] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        // pools[7] = Pool(5 ether, 5, 10 ether, 80, 0);
+        pools[0] = Pool(1000 wei, 1, 1000 wei, 130, 0); 
+        pools[1] = Pool(1000 wei, 1, 1000 wei, 130, 0);
+        pools[2] = Pool(1000 wei, 1, 10000 wei, 130, 0);
+        pools[3] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        pools[4] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        pools[5] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        pools[6] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        pools[7] = Pool(5 ether, 5, 10 ether, 80, 0);
         
-        // //Test Values
-        // downlineBonuses[0] = DownlineBonusStage(3, 100);
-        // downlineBonuses[1] = DownlineBonusStage(4, 160);
-        // downlineBonuses[2] = DownlineBonusStage(5, 210);
-        // downlineBonuses[3] = DownlineBonusStage(6, 260);
+        //Test Values
+        downlineBonuses[0] = DownlineBonusStage(3, 100);
+        downlineBonuses[1] = DownlineBonusStage(4, 160);
+        downlineBonuses[2] = DownlineBonusStage(5, 210);
+        downlineBonuses[3] = DownlineBonusStage(6, 260);
 
         userList.push(address(0));
         
     }
     
-    uint112 internal minDeposit = 0.2 ether; 
-    // uint112 internal minDeposit = 1000 wei; 
+    // uint112 internal minDeposit = 0.2 ether; 
+    uint112 internal minDeposit = 1000 wei; 
     
     uint40 constant internal payout_interval = 5 minutes;//1 days;
     // uint40 constant internal payout_interval = 30 minutes;
