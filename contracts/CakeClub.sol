@@ -18,6 +18,7 @@ interface CakeVault{
 interface IPrestigeClub{
     function depositSum() external view returns (uint128);
     function totalWithdrawn() external view returns (uint128);
+    function downlinePayoutSum() external view returns (uint128);
 }
 
 contract CakeClub is Ownable(){ //, ICakeClub
@@ -46,13 +47,29 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
     uint256 last_payout_calculation = block.timestamp;
     uint256 constant payout_interval = 5 minutes;//1 days;
-    uint256 daily_rate = 3000 * 1e12;//2706 * 1e12;  //1e18 == 100%
+    // uint256 daily_rate = 0;
+    //3000 * 1e12;//2706 * 1e12;  //1e18 == 100%
+
     uint256 dust = 100000;
 
     uint256 constant ownerShares = 15;
     uint256 public ownerProvision;
 
     event Log(string title, uint256 value);
+
+    function getDailyRate() public view returns (uint256) {
+
+        //1e12 here because 1e18 is 100% -> prestigeclub percentages are ppm -> *1e12
+        //And 2 seperate 1e12 * x because downlineRate shoudl be as exact as possible without truncations
+        uint256 downlineRate = 1e12 * (uint256(prestigeclub.downlinePayoutSum()) * 25 / 1_000_000) / uint256(prestigeclub.depositSum());
+
+        return
+        (800 + //Interest
+        250 + //Directs
+        390 //Pool (65 * 6)
+         ) * 1e12
+        + downlineRate;
+    }
 
     /**
         Withdraws pending Cake Rewards
@@ -126,11 +143,15 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
     }
 
+    function compound() external {
+
+    }
+
     function updateEstimation() public {
 
         while(block.timestamp > last_payout_calculation + payout_interval){
 
-            estimatedPeth = estimatedPeth + uint256(prestigeclub.depositSum()).mul(daily_rate).div(1e18);
+            estimatedPeth = estimatedPeth + uint256(prestigeclub.depositSum()).mul(getDailyRate()).div(1e18);
             rewardLastEstimation = totalProfit();
 
             last_payout_calculation += payout_interval;
@@ -142,9 +163,9 @@ contract CakeClub is Ownable(){ //, ICakeClub
         prestigeclub = IPrestigeClub(prestige);
     }
 
-    function setDailyRate(uint256 rate) external onlyOwner {
-        daily_rate = rate;
-    }
+    // function setDailyRate(uint256 rate) external onlyOwner {
+    //     daily_rate = rate;
+    // }
 
     // function rebalance() external {
     //     uint256 pending = cake.balanceOf(address(this));

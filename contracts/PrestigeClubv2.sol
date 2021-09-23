@@ -20,6 +20,7 @@ contract PrestigeClub is OwnableWithSeller() {
         uint112 deposit; //amount a User has paid in. Note: Deposits can not be removed, since withdrawals are only possible on payout
         uint112 payout; //Generated revenue
         uint32 position; //The position (a incrementing int value). Used for calculation of the streamline
+        //TODO Remove position field since unnedig
         uint8 qualifiedPools;  //Number of Pools and DownlineBonuses, which the User has qualified for respectively
         uint8 downlineBonus;
         address referer;
@@ -45,6 +46,8 @@ contract PrestigeClub is OwnableWithSeller() {
     uint32 public lastPosition; //= 0
     
     uint128 public depositSum; //= 0 //Pos 4
+
+    uint128 public downlinePayoutSum;
 
     uint128 public totalWithdrawn;
     
@@ -101,8 +104,8 @@ contract PrestigeClub is OwnableWithSeller() {
 
         // downlineBonuses[0] = DownlineBonusStage(3, 25);
         // downlineBonuses[1] = DownlineBonusStage(4, 50);
-        // downlineBonuses[2] = DownlineBonusStage(5, 80);
-        // downlineBonuses[3] = DownlineBonusStage(6, 105);
+        // downlineBonuses[2] = DownlineBonusStage(5, 75);
+        // downlineBonuses[3] = DownlineBonusStage(6, 100);
         
         //Testing Pools
         pools[0] = Pool(1000 wei, 1, 1000 wei, 130, 0); 
@@ -220,6 +223,7 @@ contract PrestigeClub is OwnableWithSeller() {
             users[current].downlineVolumes[bonusStage] = users[current].downlineVolumes[bonusStage].add(addition);
             uint8 currentBonus = users[current].downlineBonus;
             if(currentBonus > bonusStage){
+                downlinePayoutSum += addition * (currentBonus - bonusStage);
                 bonusStage = currentBonus;
             }
 
@@ -326,15 +330,19 @@ contract PrestigeClub is OwnableWithSeller() {
                 user.downlineBonus += 1;
                 
                 //Update data in upline
-                uint112 value = user.deposit;  //Value without current stage, since that must not be subtracted
+                uint112 value = user.deposit;  //Value without current stage, since that must not be subtracted. This value is used as the "downline value of address adr" for all Users above User adr
 
                 for(uint8 i = 0 ; i <= bonusstage ; i++){
                     value = value.add(user.downlineVolumes[i]);
                 }
 
+                downlinePayoutSum += (value - user.deposit); //This should be the amount the user is now earning more in DownlineBonus than before
+
                 // uint8 previousBonusStage = bonusstage;
                 uint8 currentBonusStage = bonusstage + 1;
                 uint8 lastBonusStage = bonusstage;
+
+                bool sumBonusStageUpdated = false;
 
                 address current = user.referer;
                 while(current != address(0)){
@@ -342,6 +350,12 @@ contract PrestigeClub is OwnableWithSeller() {
                     User storage currentUser = users[current];
                     currentUser.downlineVolumes[lastBonusStage] = currentUser.downlineVolumes[lastBonusStage].sub(value);
                     currentUser.downlineVolumes[currentBonusStage] = currentUser.downlineVolumes[currentBonusStage].add(value);
+
+                    //Remove DownlineBonus which is now consumed by User adr since he is one stage higher
+                    if(!sumBonusStageUpdated && currentUser.downlineBonus > bonusstage){
+                        downlinePayoutSum -= value;
+                        sumBonusStageUpdated = true;
+                    }
 
                     uint8 currentDB = currentUser.downlineBonus;
                     if(currentDB > currentBonusStage){
@@ -355,7 +369,7 @@ contract PrestigeClub is OwnableWithSeller() {
                         break;
                     }
 
-                    current = users[current].referer;
+                    current = currentUser.referer;
                 }
                 
                 updateDownlineBonusStage(adr);
@@ -414,7 +428,7 @@ contract PrestigeClub is OwnableWithSeller() {
     }
 
     //Data Import Logic
-    function reCalculateImported(uint32 _lastPosition, uint112 _depositSum) public onlyOwner {
+    function reCalculateImported(uint32 _lastPosition, uint112 _depositSum, uint112 _downlinePayoutSum) public onlyOwner {
         // uint40 time = pool_last_draw;
         // for(uint64 i = from ; i < to + 1 ; i++){
             // address adr = userList[i];
@@ -424,6 +438,7 @@ contract PrestigeClub is OwnableWithSeller() {
         // }
         lastPosition = _lastPosition;
         depositSum = _depositSum;
+        downlinePayoutSum = _downlinePayoutSum;
     }
     
     function _import(address[] memory _sender, uint112[] memory deposit, address[] memory _referer, uint32 startposition, 
