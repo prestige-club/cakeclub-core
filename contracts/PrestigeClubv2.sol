@@ -17,7 +17,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
     //User Object which stores all data associated with a specific address
     struct User {
-        uint112 deposit; //amount a User has paid in. Note: Deposits can not removed, since withdrawals are only possible on payout
+        uint112 deposit; //amount a User has paid in. Note: Deposits can not be removed, since withdrawals are only possible on payout
         uint112 payout; //Generated revenue
         uint32 position; //The position (a incrementing int value). Used for calculation of the streamline
         uint8 qualifiedPools;  //Number of Pools and DownlineBonuses, which the User has qualified for respectively
@@ -27,8 +27,6 @@ contract PrestigeClub is OwnableWithSeller() {
 
         uint112 directSum;   //Sum of deposits of all direct referrals
         uint40 lastPayout;  //Timestamp of the last calculated Payout
-
-        uint40 lastPayedOut; //Point in time, when the last Payout was made
 
         uint112[5] downlineVolumes;  //Used for downline bonus calculation, correspondings to logical mapping  downlineBonusStage (+ 0) => sum of deposits of users directly or indirectly referred in given downlineBonusStage
     }
@@ -83,12 +81,12 @@ contract PrestigeClub is OwnableWithSeller() {
     ICakeClub cakeClub;
     IERC20 cake;
     
-    constructor(address cakeConnector) public {
+    constructor(address _cakeClub) public {
  
         uint40 timestamp = uint40(block.timestamp);
         pool_last_draw = timestamp - (timestamp % payout_interval);// - (2 * payout_interval);
 
-        cakeClub = ICakeClub(cakeConnector);
+        cakeClub = ICakeClub(_cakeClub);
         cake = IERC20(cakeClub.cake());
 
         //Definition of the Pools and DownlineBonuses with their respective conditions and percentages. 
@@ -379,8 +377,6 @@ contract PrestigeClub is OwnableWithSeller() {
 
         User storage user = users[msg.sender];
 
-        //TODO Maybe remove the 12 hour restriction since this should be covered by the Cakeclub totalDeposited requirement
-        require(user.lastPayedOut + 12 seconds/*hours*/ < block.timestamp, "Payout only possible all 12 hours");
         require(amount < user.deposit.mul(3), "11");
 
         triggerCalculation();
@@ -389,8 +385,6 @@ contract PrestigeClub is OwnableWithSeller() {
         require(user.payout >= amount, "Not enough payout available");
         
         user.payout -= amount;
-
-        user.lastPayedOut = uint40(block.timestamp);
 
         cakeClub.withdraw(amount, msg.sender);
         
