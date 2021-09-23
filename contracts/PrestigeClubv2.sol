@@ -64,7 +64,6 @@ contract PrestigeClub is OwnableWithSeller() {
 
     struct PoolState {
         uint128 totalDeposits;
-        uint32 totalUsers;
         uint32[8] numUsers;
     }
 
@@ -295,7 +294,7 @@ contract PrestigeClub is OwnableWithSeller() {
         for(uint8 i = 0 ; i < 8 ; i++){
             temp[i] = pools[i].numUsers;
         }
-        states.push(PoolState(depositSum, lastPosition, temp));
+        states.push(PoolState(depositSum, temp));
         pool_last_draw += payout_interval;
     }
 

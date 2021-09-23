@@ -30,20 +30,20 @@ library PrestigeClubCalculations {
 
         if(user.qualifiedPools > 0){
             for(uint40 day = length - dayz ; day < length ; day++){
-
-
-                uint112 numUsers = states[day].totalUsers;
-                uint112 streamline = uint112(uint112(states[day].totalDeposits).mul(numUsers.sub(user.position))).div(numUsers);
+                
+                uint112 streamline = uint112(states[day].totalDeposits);
 
                 uint112 payout_day = 0;
-                uint32 stateNumUsers = 0;
+                uint32 poolUsersForDay = 0;
                 for(uint8 j = 0 ; j < user.qualifiedPools ; j++){
-                    uint112 pool_base = streamline.mul(pools[j].payoutQuote) / 1000000;
 
-                    stateNumUsers = states[day].numUsers[j];
+                    poolUsersForDay = states[day].numUsers[j];
 
-                    if(stateNumUsers != 0){
-                        payout_day += pool_base.div(stateNumUsers);
+                    if(poolUsersForDay != 0){
+
+                        uint112 pool_base = streamline.mul(pools[j].payoutQuote) / 1000000;
+                        payout_day += pool_base.div(poolUsersForDay);
+
                     }
                 }
 
