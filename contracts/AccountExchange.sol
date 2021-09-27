@@ -31,7 +31,7 @@ contract AccountExchange {
     address[] offerAddresses;
 
     function PCUserExists(address user) public view returns (bool) { //TODO Internal
-        (uint112 deposit,,,,,,,,) = pc.users(user);
+        (uint112 deposit,,,,,,,) = pc.users(user);
         return deposit > 0;
     }
 
