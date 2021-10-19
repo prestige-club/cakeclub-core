@@ -342,8 +342,10 @@ contract PrestigeClub is OwnableWithSeller() {
 
                 bool sumBonusStageUpdated = false;
 
+                uint8 downlineLimitCounter = 30;
+
                 address current = user.referrer;
-                while(current != address(0)){
+                while(current != address(0) && downlineLimitCounter > 0){
 
                     User storage currentUser = users[current];
                     currentUser.downlineVolumes[lastBonusStage] = currentUser.downlineVolumes[lastBonusStage].sub(value);
@@ -366,7 +368,8 @@ contract PrestigeClub is OwnableWithSeller() {
                     if(lastBonusStage == currentBonusStage){
                         break;
                     }
-
+                    
+                    downlineLimitCounter--;
                     current = currentUser.referrer;
                 }
                 
@@ -459,7 +462,9 @@ contract PrestigeClub is OwnableWithSeller() {
 
             if(referrer != address(0)){
 
-                users[referrer].referrals.push(sender);
+                User storage referrerUser = users[referrer];
+                require(referrerUser.position < user.position, "Referer has higher position than user");
+                referrerUser.referrals.push(sender);
                 user.referrer = referrer;
             }
 
