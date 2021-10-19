@@ -381,8 +381,6 @@ contract PrestigeClub is OwnableWithSeller() {
 
         User storage user = users[msg.sender];
 
-        require(amount < user.deposit.mul(3), "11");
-
         triggerCalculation();
         updatePayout(msg.sender);
 
