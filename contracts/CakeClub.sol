@@ -17,8 +17,7 @@ interface CakeVault{
 
 interface IPrestigeClub{
     function depositSum() external view returns (uint128);
-    //function totalWithdrawn() external view returns (uint128);
-    function downlinePayoutSum() external view returns (uint128);
+    function totalDownlineVolume() external view returns (uint128);
 }
 
 contract CakeClub is Ownable(){ //, ICakeClub
@@ -61,7 +60,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
         //1e12 here because 1e18 is 100% -> prestigeclub percentages are ppm -> *1e12
         //And 2 seperate 1e12 * x because downlineRate shoudl be as exact as possible without truncations
-        uint256 downlineRate = 1e12 * (uint256(prestigeclub.downlinePayoutSum()) * 25/*/ 1_000_000*/) / uint256(prestigeclub.depositSum());
+        uint256 downlineRate = 1e12 * (uint256(prestigeclub.totalDownlineVolume()) * 25/*/ 1_000_000*/) / uint256(prestigeclub.depositSum());
 
         return
         (800 + //Interest
