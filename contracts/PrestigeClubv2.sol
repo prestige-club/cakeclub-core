@@ -95,12 +95,12 @@ contract PrestigeClub is OwnableWithSeller() {
         //Note, values are not final, adapted for testing purposes
 
         //Prod values
-        // pools[0] = Pool(1 ether, 1, 1 ether, 65, 0);
-        // pools[1] = Pool(3 ether, 3, 10 ether, 65, 0);
-        // pools[2] = Pool(5 ether, 4, 20 ether, 65, 0);
-        // pools[3] = Pool(15 ether, 10, 100 ether, 65, 0);
-        // pools[4] = Pool(30 ether, 15, 280 ether, 65, 0);
-        // pools[5] = Pool(45 ether, 20, 500 ether, 65, 0);
+        // pools[0] = Pool(20 ether, 1, 20 ether, 70, 0);
+        // pools[1] = Pool(166 ether, 3, 300 ether, 70, 0);
+        // pools[2] = Pool(662 ether, 4, 1200 ether, 70, 0);
+        // pools[3] = Pool(1250 ether, 10, 4000 ether, 70, 0);
+        // pools[4] = Pool(2300 ether, 15, 9000 ether, 70, 0);
+        // pools[5] = Pool(3250 ether, 20, 18000 ether, 70, 0);
 
         // downlineBonuses[0] = DownlineBonusStage(3, 25);
         // downlineBonuses[1] = DownlineBonusStage(4, 50);
@@ -114,8 +114,6 @@ contract PrestigeClub is OwnableWithSeller() {
         pools[3] = Pool(2 ether, 1, 10000 wei, 130, 0);
         pools[4] = Pool(2 ether, 1, 10000 wei, 130, 0);
         pools[5] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        pools[6] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        pools[7] = Pool(5 ether, 5, 10 ether, 80, 0);
         
         //Test Values
         downlineBonuses[0] = DownlineBonusStage(3, 100);
@@ -127,10 +125,10 @@ contract PrestigeClub is OwnableWithSeller() {
         
     }
     
-    // uint112 internal minDeposit = 0.2 ether; 
+    // uint112 internal minDeposit = 20 ether; 
     uint112 internal minDeposit = 1000 wei; 
     
-    uint40 constant internal payout_interval = 5 minutes;//1 days;
+    uint40 constant internal payout_interval = 15 minutes;//1 days;
     // uint40 constant internal payout_interval = 30 minutes;
     
     //Investment function for new deposits

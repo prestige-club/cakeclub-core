@@ -46,7 +46,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
     uint256 public rewardLastEstimation;
 
     uint256 last_payout_calculation = block.timestamp;
-    uint256 constant payout_interval = 5 minutes;//1 days;
+    uint256 constant payout_interval = 15 minutes;//1 days;
     // uint256 daily_rate = 0;
     //3000 * 1e12;//2706 * 1e12;  //1e18 == 100%
 
