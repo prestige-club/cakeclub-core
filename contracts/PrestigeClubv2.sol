@@ -23,7 +23,7 @@ contract PrestigeClub is OwnableWithSeller() {
         //TODO Remove position field since unnedig
         uint8 qualifiedPools;  //Number of Pools and DownlineBonuses, which the User has qualified for respectively
         uint8 downlineBonus;
-        address referer;
+        address referrer;
         address[] referrals;
 
         uint112 directSum;   //Sum of deposits of all direct referrals
@@ -155,10 +155,10 @@ contract PrestigeClub is OwnableWithSeller() {
             userList.push(sender);
         }
 
-        address referer = user.referer; //can put outside because referer is always set since setReferral() gets called before recieve() in recieve(address)
+        address referrer = user.referrer; //can put outside because referrer is always set since setReferral() gets called before recieve() in recieve(address)
 
-        if(referer != address(0)){
-            updateUpline(sender, referer, amount);
+        if(referrer != address(0)){
+            updateUpline(sender, referrer, amount);
         }
 
         //Update Payouts
@@ -172,11 +172,11 @@ contract PrestigeClub is OwnableWithSeller() {
         
         updateUserPool(sender);
         updateDownlineBonusStage(sender);
-        if(referer != address(0)){
-            users[referer].directSum = users[referer].directSum.add(amount);
+        if(referrer != address(0)){
+            users[referrer].directSum = users[referrer].directSum.add(amount);
 
-            updateUserPool(referer);
-            updateDownlineBonusStage(referer);
+            updateUserPool(referrer);
+            updateDownlineBonusStage(referrer);
         }
         
         require(depositSum + amount > depositSum, "Overflow");
@@ -186,9 +186,9 @@ contract PrestigeClub is OwnableWithSeller() {
     
     
     //New deposits with referral address
-    function recieve(uint112 amount, address referer) public {
+    function recieve(uint112 amount, address referrer) public {
         
-        _setReferral(referer);
+        _setReferral(referrer);
         recieve(amount);
         
     }
@@ -206,7 +206,7 @@ contract PrestigeClub is OwnableWithSeller() {
     }
 
     //Updating the payouts and stats for the direct and every User which indirectly referred User reciever
-    //adr = Address of the first referer , addition = new deposit value
+    //adr = Address of the first referrer , addition = new deposit value
     function updateUpline(address reciever, address adr, uint112 addition) private {
         
         address current = adr;
@@ -225,7 +225,7 @@ contract PrestigeClub is OwnableWithSeller() {
                 bonusStage = currentBonus;
             }
 
-            current = users[current].referer;
+            current = users[current].referrer;
             downlineLimitCounter--;
         }
         
@@ -342,7 +342,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
                 bool sumBonusStageUpdated = false;
 
-                address current = user.referer;
+                address current = user.referrer;
                 while(current != address(0)){
 
                     User storage currentUser = users[current];
@@ -367,7 +367,7 @@ contract PrestigeClub is OwnableWithSeller() {
                         break;
                     }
 
-                    current = currentUser.referer;
+                    current = currentUser.referrer;
                 }
                 
                 updateDownlineBonusStage(adr);
@@ -395,26 +395,26 @@ contract PrestigeClub is OwnableWithSeller() {
         
     }
 
-    function _setReferral(address referer) private {
+    function _setReferral(address referrer) private {
         
         User storage user = users[msg.sender];
-        if(user.referer == referer){
+        if(user.referrer == referrer){
             return;
         }
         
-        if(user.position != 0 && user.position < users[referer].position) {
+        if(user.position != 0 && user.position < users[referrer].position) {
             return;
         }
         
-        require(user.referer == address(0), "Referer already set");
-        require(users[referer].position > 0, "Referer doesnt exist");
-        require(msg.sender != referer, "Referer is self");
+        require(user.referrer == address(0), "Referrer already set");
+        require(users[referrer].position > 0, "Referrer doesnt exist");
+        require(msg.sender != referrer, "Referrer is self");
         
-        users[referer].referrals.push(msg.sender);
-        user.referer = referer;
+        users[referrer].referrals.push(msg.sender);
+        user.referrer = referrer;
 
         if(user.deposit > 0){
-            users[referer].directSum = users[referer].directSum.add(user.deposit);
+            users[referrer].directSum = users[referrer].directSum.add(user.deposit);
         }
         
     }
@@ -437,7 +437,7 @@ contract PrestigeClub is OwnableWithSeller() {
         downlinePayoutSum = _downlinePayoutSum;
     }
     
-    function _import(address[] memory _sender, uint112[] memory deposit, address[] memory _referer, uint32 startposition, 
+    function _import(address[] memory _sender, uint112[] memory deposit, address[] memory _referrer, uint32 startposition, 
         uint8[] memory downlineBonus, uint112[5][] memory volumes) public onlyOwner {
 
         require(userList.length == startposition, "Positions wrong");
@@ -447,7 +447,7 @@ contract PrestigeClub is OwnableWithSeller() {
         for(uint32 i = 0 ; i < _sender.length ; i++){
 
             address sender = _sender[i];
-            address referer = _referer[i];
+            address referrer = _referrer[i];
             User storage user = users[sender];
 
             require(user.deposit == 0, "Account exists already");
@@ -457,10 +457,10 @@ contract PrestigeClub is OwnableWithSeller() {
             user.lastPayout = time;
             userList.push(sender);
 
-            if(referer != address(0)){
+            if(referrer != address(0)){
 
-                users[referer].referrals.push(sender);
-                user.referer = referer;
+                users[referrer].referrals.push(sender);
+                user.referrer = referrer;
             }
 
             user.deposit = deposit[i];
@@ -470,11 +470,11 @@ contract PrestigeClub is OwnableWithSeller() {
             
             updateUserPool(sender);
             
-            if(referer != address(0)){
+            if(referrer != address(0)){
                 
-                users[referer].directSum += deposit[i];
+                users[referrer].directSum += deposit[i];
         
-                updateUserPool(referer);
+                updateUserPool(referrer);
             }
 
         }
@@ -519,19 +519,19 @@ contract PrestigeClub is OwnableWithSeller() {
 
         userList[userFrom.position] = to;
 
-        address referer = userFrom.referer;
-        if(referer != address(0)){
-            address[] storage arr = users[referer].referrals;
+        address referrer = userFrom.referrer;
+        if(referrer != address(0)){
+            address[] storage arr = users[referrer].referrals;
             for(uint16 i = 0 ; i < arr.length ; i++){
                 if(arr[i] == from){
-                    users[referer].referrals[i] = to;
+                    users[referrer].referrals[i] = to;
                     break;
                 }
             }
         }
 
         for(uint16 i = 0 ; i < users[from].referrals.length ; i++){
-            users[userFrom.referrals[i]].referer = to;
+            users[userFrom.referrals[i]].referrer = to;
         }
 
         users[to] = userFrom;
