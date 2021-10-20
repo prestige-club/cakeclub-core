@@ -176,14 +176,18 @@ contract CakeClub is Ownable(){ //, ICakeClub
         cake.transfer(owner(), ownerProvision);
     }
 
-    function initialInvest(uint256 amount) external onlyOwner {
+    function initialInvest(uint256 amount, uint256 importedRewards) external onlyOwner {
+
+        if(importedRewards > 0){
+            require(alreadyWithdrawn == 0, "Cant import rewards twice");
+        }
 
         uint256 pending = vault.pendingCake(0, address(this));
 
         //Invest into Masterchef
         vault.enterStaking(amount); //Expects that cake already lie on address(this)
 
-        alreadyWithdrawn = alreadyWithdrawn.add(pending);
+        alreadyWithdrawn = alreadyWithdrawn.add(pending).add(importedRewards);
 
         depositedCake = depositedCake.add(amount);
     }
