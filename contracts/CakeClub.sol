@@ -44,10 +44,8 @@ contract CakeClub is Ownable(){ //, ICakeClub
     uint256 public estimatedPeth;
     uint256 public rewardLastEstimation;
 
-    uint256 last_payout_calculation = block.timestamp;
     uint256 constant payout_interval = 15 minutes;//1 days;
-    // uint256 daily_rate = 0;
-    //3000 * 1e12;//2706 * 1e12;  //1e18 == 100%
+    uint256 last_payout_calculation = block.timestamp - (block.timestamp % payout_interval);
 
     uint256 dust = 100000;
 
@@ -55,6 +53,8 @@ contract CakeClub is Ownable(){ //, ICakeClub
     uint256 public ownerProvision;
 
     event Log(string title, uint256 value);
+
+    event Withdrawal(address indexed addr, uint256 peth, uint256 cake);
 
     function getDailyRate() public view returns (uint256) {
 
@@ -97,6 +97,20 @@ contract CakeClub is Ownable(){ //, ICakeClub
         return vault.pendingCake(0, address(this)) + alreadyWithdrawn;
     }
 
+    //Note This function is only used by the frontend
+    function outputWithEstimation(uint256 peth) public view returns (uint256){
+        uint pethEstimation = estimatedPeth;
+        uint rewards = rewardLastEstimation;
+
+        uint dayz = (block.timestamp - last_payout_calculation) / payout_interval;
+        if(dayz > 0){
+            pethEstimation += uint256(prestigeclub.depositSum()).mul(getDailyRate()).mul(dayz).div(1e18);
+            rewards = totalProfit();
+        }
+
+        return 1 ether * peth / pethEstimation * rewards / 1 ether;
+    }
+
     function output(uint256 peth) public view returns (uint256) {
         return 1 ether * peth / estimatedPeth * rewardLastEstimation / 1 ether;
     }
@@ -106,17 +120,10 @@ contract CakeClub is Ownable(){ //, ICakeClub
         updateEstimation();
         uint256 cakeAmount = output(peth);
 
-        emit Log("Peth", peth);
-        emit Log("EstimatedPeth", estimatedPeth);
-        emit Log("Total Profit", totalProfit());
-        emit Log("Cake Amount", cakeAmount);
-        emit Log("Already Withdrawn", peth);
-        emit Log("Pending Cake", vault.pendingCake(0, address(this)));
-
         uint256 pending = vault.pendingCake(0, address(this));
         // uint256 pending = pendingTotal * 85 / 100;
         uint256 withdrawAmount = 0;
-        if(pending < cakeAmount){ //Since re-staking will occur, withdrawal of Stake is possible
+        if(pending < cakeAmount){ //Since compounding will occur, withdrawal of Stake is possible
             withdrawAmount = cakeAmount - pending;
         }
 
@@ -134,8 +141,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
             vault.enterStaking(balanceLeft);
         }
 
-        // (uint256 amount,) = vault.userInfo(0, address(this));
-        // require(withdrawAmount <= amount - depositedCake, "Cannot withdraw more than reward amount");
+        emit Withdrawal(to, peth, cakeAmount);
 
         (uint256 deposit, ) = vault.userInfo(0, address(this));
         require(deposit >= depositedCake, "Vault Deposit under total deposits");
@@ -165,16 +171,6 @@ contract CakeClub is Ownable(){ //, ICakeClub
     function setPrestigeClub(address prestige) external onlyOwner {
         prestigeclub = IPrestigeClub(prestige);
     }
-
-    // function setDailyRate(uint256 rate) external onlyOwner {
-    //     daily_rate = rate;
-    // }
-
-    // function rebalance() external {
-    //     uint256 pending = cake.balanceOf(address(this));
-    //     alreadyWithdrawn += pending;
-    //     vault.enterStaking(0); //pending
-    // }
 
     function payoutProvision() external onlyOwner {
         cake.transfer(owner(), ownerProvision);
