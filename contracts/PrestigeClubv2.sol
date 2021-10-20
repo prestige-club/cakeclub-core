@@ -86,7 +86,7 @@ contract PrestigeClub is OwnableWithSeller() {
     constructor(address _cakeClub) public {
  
         uint40 timestamp = uint40(block.timestamp);
-        pool_last_draw = timestamp - (timestamp % payout_interval);// - (2 * payout_interval);
+        pool_last_draw = timestamp - (timestamp % payout_interval);
 
         cakeClub = ICakeClub(_cakeClub);
         cake = IERC20(cakeClub.cake());
@@ -95,41 +95,41 @@ contract PrestigeClub is OwnableWithSeller() {
         //Note, values are not final, adapted for testing purposes
 
         //Prod values
-        // pools[0] = Pool(20 ether, 1, 20 ether, 70, 0);
-        // pools[1] = Pool(166 ether, 3, 300 ether, 70, 0);
-        // pools[2] = Pool(662 ether, 4, 1200 ether, 70, 0);
-        // pools[3] = Pool(1250 ether, 10, 4000 ether, 70, 0);
-        // pools[4] = Pool(2300 ether, 15, 9000 ether, 70, 0);
-        // pools[5] = Pool(3250 ether, 20, 18000 ether, 70, 0);
+        pools[0] = Pool(20 ether, 1, 20 ether, 70, 0);
+        pools[1] = Pool(166 ether, 3, 300 ether, 70, 0);
+        pools[2] = Pool(662 ether, 4, 1200 ether, 70, 0);
+        pools[3] = Pool(1250 ether, 10, 4000 ether, 70, 0);
+        pools[4] = Pool(2300 ether, 15, 9000 ether, 70, 0);
+        pools[5] = Pool(3250 ether, 20, 18000 ether, 70, 0);
 
-        // downlineBonuses[0] = DownlineBonusStage(3, 25);
-        // downlineBonuses[1] = DownlineBonusStage(4, 50);
-        // downlineBonuses[2] = DownlineBonusStage(5, 75);
-        // downlineBonuses[3] = DownlineBonusStage(6, 100);
+        downlineBonuses[0] = DownlineBonusStage(3, 25);
+        downlineBonuses[1] = DownlineBonusStage(4, 50);
+        downlineBonuses[2] = DownlineBonusStage(5, 75);
+        downlineBonuses[3] = DownlineBonusStage(6, 100);
         
         //Testing Pools
-        pools[0] = Pool(1000 wei, 1, 1000 wei, 130, 0); 
-        pools[1] = Pool(1000 wei, 1, 1000 wei, 130, 0);
-        pools[2] = Pool(1000 wei, 1, 10000 wei, 130, 0);
-        pools[3] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        pools[4] = Pool(2 ether, 1, 10000 wei, 130, 0);
-        pools[5] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        // pools[0] = Pool(1000 wei, 1, 1000 wei, 130, 0); 
+        // pools[1] = Pool(1000 wei, 1, 1000 wei, 130, 0);
+        // pools[2] = Pool(1000 wei, 1, 10000 wei, 130, 0);
+        // pools[3] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        // pools[4] = Pool(2 ether, 1, 10000 wei, 130, 0);
+        // pools[5] = Pool(2 ether, 1, 10000 wei, 130, 0);
         
         //Test Values
-        downlineBonuses[0] = DownlineBonusStage(3, 100);
-        downlineBonuses[1] = DownlineBonusStage(4, 160);
-        downlineBonuses[2] = DownlineBonusStage(5, 210);
-        downlineBonuses[3] = DownlineBonusStage(6, 260);
+        // downlineBonuses[0] = DownlineBonusStage(3, 100);
+        // downlineBonuses[1] = DownlineBonusStage(4, 160);
+        // downlineBonuses[2] = DownlineBonusStage(5, 210);
+        // downlineBonuses[3] = DownlineBonusStage(6, 260);
 
         userList.push(address(0));
         
     }
     
-    // uint112 internal minDeposit = 20 ether; 
-    uint112 internal minDeposit = 1000 wei; 
+    uint112 internal minDeposit = 20 ether; 
+    // uint112 internal minDeposit = 1000 wei; 
     
-    uint40 constant internal payout_interval = 15 minutes;//1 days;
-    // uint40 constant internal payout_interval = 30 minutes;
+    // uint40 constant internal payout_interval = 15 minutes;
+    uint40 constant internal payout_interval = 1 days;
     
     //Investment function for new deposits
     function recieve(uint112 amount) public {
@@ -179,8 +179,8 @@ contract PrestigeClub is OwnableWithSeller() {
             updateDownlineBonusStage(referrer);
         }
         
-        require(depositSum + amount > depositSum, "Overflow");
-        depositSum = depositSum + amount; //Won´t do an overflow since value is uint112 and depositSum 128
+        require(depositSum + amount > depositSum, "Overflow"); //Overflow check
+        depositSum = depositSum + amount; 
 
     }
     
@@ -195,11 +195,11 @@ contract PrestigeClub is OwnableWithSeller() {
 
     function reinvest(uint112 amount) public {
 
-        uint256 before = cake.balanceOf(msg.sender);
+        uint112 before = uint112(cake.balanceOf(msg.sender));
 
         withdraw(amount);
 
-        uint112 diff = uint112(cake.balanceOf(msg.sender) - before);
+        uint112 diff = uint112(cake.balanceOf(msg.sender)).sub(before);
 
         recieve(diff);
 
@@ -234,13 +234,14 @@ contract PrestigeClub is OwnableWithSeller() {
     //Updates the payout amount for given user
     function updatePayout(address adr) private {
         
-        uint40 dayz = (uint40(block.timestamp) - users[adr].lastPayout) / (payout_interval);
+        User storage user = users[adr];
+        uint40 dayz = (uint40(block.timestamp) - user.lastPayout) / (payout_interval);
         if(dayz >= 1){
             
             // Calculate Base Payouts
 
             // Interest Payout
-            uint112 deposit = users[adr].deposit;
+            uint112 deposit = user.deposit;
             uint8 quote = 8;
             
             uint112 interestPayout = deposit.mul(quote) / 10000;
@@ -254,8 +255,11 @@ contract PrestigeClub is OwnableWithSeller() {
             uint112 sum = interestPayout.add(directsPayout).add(downlineBonusAmount); 
             sum = (sum.mul(dayz)).add(poolpayout);
             
-            users[adr].payout = users[adr].payout.add(sum);
-            users[adr].lastPayout += (payout_interval * dayz);
+            user.payout = user.payout.add(sum);
+
+            uint40 lastPayoutTemp = user.lastPayout;
+            user.lastPayout += (payout_interval * dayz);
+            require(user.lastPayout >= lastPayoutTemp, "Overflow");
             
             emit Payout(adr, interestPayout, directsPayout, poolpayout, downlineBonusAmount, dayz);
 
@@ -278,7 +282,7 @@ contract PrestigeClub is OwnableWithSeller() {
     }
     
     function triggerCalculation() public { 
-        while(block.timestamp > pool_last_draw + payout_interval){  //TODO Possible issue of unusability when not used for x days and therefore Out of Gas issue
+        while(block.timestamp > pool_last_draw + payout_interval){
             pushPoolState();
         }
     }
@@ -389,7 +393,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
         require(user.payout >= amount, "Not enough payout available");
         
-        user.payout -= amount;
+        user.payout -= amount; //No Safemath since validation occurs above
 
         cakeClub.withdraw(amount, msg.sender);
         
