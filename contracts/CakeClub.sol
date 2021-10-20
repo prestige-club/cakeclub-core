@@ -60,14 +60,14 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
         //1e12 here because 1e18 is 100% -> prestigeclub percentages are ppm -> *1e12
         //And 2 seperate 1e12 * x because downlineRate shoudl be as exact as possible without truncations
-        uint256 downlineRate = 1e12 * (uint256(prestigeclub.totalDownlineVolume()) * 25/*/ 1_000_000*/) / uint256(prestigeclub.depositSum());
+        uint256 downlineRate = uint256(1e12).mul(uint256(prestigeclub.totalDownlineVolume()).mul(25)).div(uint256(prestigeclub.depositSum()));
 
         return
-        (800 + //Interest
+        uint256((800 + //Interest
         250 + //Directs
         390 //Pool (65 * 6)
-         ) * 1e12
-        + downlineRate;
+         ) * 1e12)
+        .add(downlineRate);
     }
 
     /**
@@ -78,7 +78,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
         uint256 balance = cake.balanceOf(address(this));
         vault.leaveStaking(0);
         uint256 diff = cake.balanceOf(address(this)).sub(balance);
-        alreadyWithdrawn += diff;
+        alreadyWithdrawn = alreadyWithdrawn.add(diff);
         return diff;
     }
 
@@ -94,7 +94,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
     }
 
     function totalProfit() public view returns (uint256) {
-        return vault.pendingCake(0, address(this)) + alreadyWithdrawn;
+        return vault.pendingCake(0, address(this)).add(alreadyWithdrawn);
     }
 
     //Note This function is only used by the frontend
@@ -102,9 +102,9 @@ contract CakeClub is Ownable(){ //, ICakeClub
         uint pethEstimation = estimatedPeth;
         uint rewards = rewardLastEstimation;
 
-        uint dayz = (block.timestamp - last_payout_calculation) / payout_interval;
+        uint dayz = (block.timestamp.sub(last_payout_calculation)) / payout_interval; //payout_interval will never be 0
         if(dayz > 0){
-            pethEstimation += uint256(prestigeclub.depositSum()).mul(getDailyRate()).mul(dayz).div(1e18);
+            pethEstimation = pethEstimation.add(uint256(prestigeclub.depositSum()).mul(getDailyRate()).mul(dayz).div(1e18));
             rewards = totalProfit();
         }
 
@@ -112,7 +112,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
     }
 
     function output(uint256 peth) public view returns (uint256) {
-        return 1 ether * peth / estimatedPeth * rewardLastEstimation / 1 ether;
+        return uint256(1 ether).mul(peth).div(estimatedPeth).mul(rewardLastEstimation) / 1 ether;
     }
 
     function withdraw(uint256 peth, address to) public onlyPrestige {
@@ -124,17 +124,17 @@ contract CakeClub is Ownable(){ //, ICakeClub
         // uint256 pending = pendingTotal * 85 / 100;
         uint256 withdrawAmount = 0;
         if(pending < cakeAmount){ //Since compounding will occur, withdrawal of Stake is possible
-            withdrawAmount = cakeAmount - pending;
+            withdrawAmount = cakeAmount.sub(pending);
         }
 
         vault.leaveStaking(withdrawAmount);
 
-        alreadyWithdrawn += pending;
+        alreadyWithdrawn = alreadyWithdrawn.add(pending);
 
-        uint256 ownerSharesC = cakeAmount * ownerShares / 100;
+        uint256 ownerSharesC = cakeAmount * ownerShares / 100; //ownerShares can´t be in the range of overflows
         
         ownerProvision += ownerSharesC;
-        cake.transfer(to, cakeAmount - ownerSharesC);
+        cake.transfer(to, cakeAmount.sub(ownerSharesC));
 
         uint256 balanceLeft = cake.balanceOf(address(this));
         if(balanceLeft > 0){
@@ -160,7 +160,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
         while(block.timestamp > last_payout_calculation + payout_interval){
 
-            estimatedPeth = estimatedPeth + uint256(prestigeclub.depositSum()).mul(getDailyRate()).div(1e18);
+            estimatedPeth = estimatedPeth.add(uint256(prestigeclub.depositSum()).mul(getDailyRate()).div(1e18));
             rewardLastEstimation = totalProfit();
 
             last_payout_calculation += payout_interval;
@@ -183,9 +183,9 @@ contract CakeClub is Ownable(){ //, ICakeClub
         //Invest into Masterchef
         vault.enterStaking(amount); //Expects that cake already lie on address(this)
 
-        alreadyWithdrawn += pending;
+        alreadyWithdrawn = alreadyWithdrawn.add(pending);
 
-        depositedCake += amount;
+        depositedCake = depositedCake.add(amount);
     }
 
     modifier onlyPrestige() {
