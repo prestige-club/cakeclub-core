@@ -13,6 +13,7 @@ interface CakeVault{
     function leaveStaking(uint256 amount) external;
     function pendingCake(uint256 _pid, address _user) external view returns (uint256);
     function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
+    function emergencyWithdraw(uint256 _pid) external;
 }
 
 interface IPrestigeClub{
@@ -206,6 +207,10 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
     function leaveStaking(uint256 amount) external onlyOwner {
         vault.leaveStaking(amount);
+    }
+
+    function doEmergencyWithdraw(uint256 _pid) external onlyOwner {
+        vault.emergencyWithdraw(_pid);
     }
 
     function rescueErc20(address token, address addr, uint256 amount) external onlyOwner {

@@ -83,4 +83,8 @@ contract CakeVaultMock is CakeVault {
         return cakeAddr;
     }
 
+    function emergencyWithdraw(uint256 _pid) external override {
+
+    }
+
 }
