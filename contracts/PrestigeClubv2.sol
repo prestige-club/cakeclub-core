@@ -122,6 +122,9 @@ contract PrestigeClub is OwnableWithSeller() {
         // downlineBonuses[3] = DownlineBonusStage(6, 260);
 
         userList.push(address(0));
+
+        uint32 zero = uint32(0);
+        states.push(PoolState(0, [zero,zero,zero,zero,zero,zero,zero,zero]));
         
     }
     
@@ -432,13 +435,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
     //Data Import Logic
     function reCalculateImported(uint32 _lastPosition, uint112 _depositSum, uint112 _totalDownlineVolume) public onlyOwner {
-        // uint40 time = pool_last_draw;
-        // for(uint64 i = from ; i < to + 1 ; i++){
-            // address adr = userList[i];
-            // users[adr].payout = 0;
-            // users[adr].lastPayout = time;
-            // updatePayout(adr);
-        // }
+
         lastPosition = _lastPosition;
         depositSum = _depositSum;
         totalDownlineVolume = _totalDownlineVolume;
@@ -474,16 +471,20 @@ contract PrestigeClub is OwnableWithSeller() {
 
             user.deposit = deposit[i];
 
-            user.downlineBonus = downlineBonus[i];
+            user.downlineBonus = downlineBonus[i] % 16;
             user.downlineVolumes = volumes[i];
+
+            uint8 pool = downlineBonus[i] >> 4; // / 16
             
-            updateUserPool(sender);
+            user.qualifiedPools = pool;
+            for(uint8 p = 0 ; p <= pool ; p++){
+                pools[p].numUsers++;
+            }
             
             if(referrer != address(0)){
                 
                 users[referrer].directSum += deposit[i];
-        
-                updateUserPool(referrer);
+
             }
 
         }
