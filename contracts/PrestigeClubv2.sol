@@ -198,13 +198,17 @@ contract PrestigeClub is OwnableWithSeller() {
 
     function reinvest(uint112 amount) public {
 
-        uint112 before = uint112(cake.balanceOf(msg.sender));
+        uint256 before = cake.balanceOf(msg.sender);
 
         withdraw(amount);
 
-        uint112 diff = uint112(cake.balanceOf(msg.sender)).sub(before);
+        uint256 afterB = cake.balanceOf(msg.sender);
+        require(afterB > before, "Overflow");
 
-        recieve(diff);
+        uint256 diff = afterB - before;
+        require(diff < ~uint112(0), "uint112 overflow");
+
+        recieve(uint112(diff));
 
     }
 
@@ -224,7 +228,9 @@ contract PrestigeClub is OwnableWithSeller() {
             users[current].downlineVolumes[bonusStage] = users[current].downlineVolumes[bonusStage].add(addition);
             uint8 currentBonus = users[current].downlineBonus;
             if(currentBonus > bonusStage){
+                uint128 prevTDV = totalDownlineVolume;
                 totalDownlineVolume += addition * (currentBonus - bonusStage);
+                require(prevTDV <= totalDownlineVolume, "Overflow");
                 bonusStage = currentBonus;
             }
 
@@ -341,7 +347,9 @@ contract PrestigeClub is OwnableWithSeller() {
                     value = value.add(user.downlineVolumes[i]);
                 }
 
+                uint128 prevTDV = totalDownlineVolume;
                 totalDownlineVolume += (value - user.deposit); //This should be the amount the user is now earning more in DownlineBonus than before
+                require(prevTDV <= totalDownlineVolume, "Overflow");
 
                 // uint8 previousBonusStage = bonusstage;
                 uint8 currentBonusStage = bonusstage + 1;
@@ -360,6 +368,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
                     //Remove DownlineBonus which is now consumed by User adr since he is one stage higher
                     if(!sumBonusStageUpdated && currentUser.downlineBonus > bonusstage){
+                        require(value < totalDownlineVolume, "Overflow");
                         totalDownlineVolume -= value;
                         sumBonusStageUpdated = true;
                     }
@@ -446,7 +455,7 @@ contract PrestigeClub is OwnableWithSeller() {
 
         require(userList.length == startposition, "Positions wrong");
 
-        uint40 time = pool_last_draw;// + (2 * payout_interval);
+        uint40 time = pool_last_draw;
 
         for(uint32 i = 0 ; i < _sender.length ; i++){
 
@@ -547,11 +556,5 @@ contract PrestigeClub is OwnableWithSeller() {
         users[to] = userFrom;
         delete users[from];
 
-    }
-
-    // -------------- DEBUG ---------------
-
-    function triggerPayoutUpdate(address adr) external {
-        updatePayout(adr);
     }
 }
