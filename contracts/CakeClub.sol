@@ -174,6 +174,15 @@ contract CakeClub is Ownable(){ //, ICakeClub
     }
 
     function payoutProvision() external onlyOwner {
+
+        _withdrawRewards();
+        uint256 balance = cake.balanceOf(address(this));
+
+        if(balance < ownerProvision){
+            uint256 left = ownerProvision.sub(balance);
+            vault.leaveStaking(left);
+        }
+
         cake.transfer(owner(), ownerProvision);
     }
 
