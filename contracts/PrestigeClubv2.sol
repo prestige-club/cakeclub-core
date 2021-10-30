@@ -20,7 +20,6 @@ contract PrestigeClub is OwnableWithSeller() {
         uint112 deposit; //amount a User has paid in. Note: Deposits can not be removed, since withdrawals are only possible on payout
         uint112 payout; //Generated revenue
         uint32 position; //The position (a incrementing int value). Used for calculation of the streamline
-        //TODO Remove position field since unnedig
         uint8 qualifiedPools;  //Number of Pools and DownlineBonuses, which the User has qualified for respectively
         uint8 downlineBonus;
         address referrer;
@@ -92,7 +91,6 @@ contract PrestigeClub is OwnableWithSeller() {
         cake = IERC20(cakeClub.cake());
 
         //Definition of the Pools and DownlineBonuses with their respective conditions and percentages. 
-        //Note, values are not final, adapted for testing purposes
 
         //Prod values
         pools[0] = Pool(20 ether, 1, 20 ether, 70, 0);
@@ -125,11 +123,11 @@ contract PrestigeClub is OwnableWithSeller() {
 
         uint32 zero = uint32(0);
         states.push(PoolState(0, [zero,zero,zero,zero,zero,zero,zero,zero]));
+        states.push(PoolState(0, [zero,zero,zero,zero,zero,zero,zero,zero]));
         
     }
     
     uint112 internal minDeposit = 20 ether; 
-    // uint112 internal minDeposit = 1000 wei; 
     
     // uint40 constant internal payout_interval = 15 minutes;
     uint40 constant internal payout_interval = 1 days;
@@ -556,5 +554,9 @@ contract PrestigeClub is OwnableWithSeller() {
         users[to] = userFrom;
         delete users[from];
 
+    }
+
+    function setCakeClub(address _cakeClub) external onlyOwner {
+        cakeClub = ICakeClub(_cakeClub);
     }
 }

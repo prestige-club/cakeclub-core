@@ -29,6 +29,12 @@ library PrestigeClubCalculations {
         uint112 poolpayout = 0;
 
         if(user.qualifiedPools > 0){
+            // uint40 start;
+            // if(length >= dayz){
+            //     start = ;
+            // }else{
+            //     start = 0;
+            // }
             for(uint40 day = length - dayz ; day < length ; day++){
                 
                 uint112 streamline = uint112(states[day].totalDeposits);
