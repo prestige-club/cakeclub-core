@@ -57,6 +57,10 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
     event Withdrawal(address indexed addr, uint256 peth, uint256 cake);
 
+    uint256 baseRate = 800 + //Interest
+        250 + //Directs
+        390; //Pool (65 * 6)
+
     function getDailyRate() public view returns (uint256) {
 
         //1e12 here because 1e18 is 100% -> prestigeclub percentages are ppm -> *1e12
@@ -64,10 +68,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
         uint256 downlineRate = uint256(1e12).mul(uint256(prestigeclub.totalDownlineVolume()).mul(25)).div(uint256(prestigeclub.depositSum()));
 
         return
-        uint256((800 + //Interest
-        250 + //Directs
-        390 //Pool (65 * 6)
-         ) * 1e12)
+        uint256((baseRate) * 1e12)
         .add(downlineRate);
     }
 
@@ -207,7 +208,6 @@ contract CakeClub is Ownable(){ //, ICakeClub
         _;
     }
 
-
     // ---- Safety functions -----
     function emergencyWithdraw(uint256 amount) external onlyOwner {
         vault.leaveStaking(amount);
@@ -224,6 +224,10 @@ contract CakeClub is Ownable(){ //, ICakeClub
 
     function rescueErc20(address token, address addr, uint256 amount) external onlyOwner {
         IERC20(token).transfer(addr, amount);
+    }
+
+    function setBaseRate(uint256 _baseRate) external onlyOwner {
+        baseRate = _baseRate;
     }
 
 }
