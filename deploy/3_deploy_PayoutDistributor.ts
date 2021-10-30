@@ -16,11 +16,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     //Deploy PrestigeClub
 
     //   let cake = await ethers.getContractAt("CakeToken", CakeToken.address) as CakeToken
-    let cake = await deploy('CakeMock', {
-        from: deployer,
-        args: [],
-        log: true
-    })
+    // let cake = await deploy('CakeMock', {
+    //     from: deployer,
+    //     args: [],
+    //     log: true
+    // })
+    let cake = {address: "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82"}
 
     const distributor = await deploy('PayoutDistributor', {
         from: deployer,
@@ -30,34 +31,38 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     let d = await ethers.getContractAt("PayoutDistributor", distributor.address) as PayoutDistributor
-    let cakeInstance = await ethers.getContractAt("CakeMock", cake.address) as CakeMock
+    // let cakeInstance = await ethers.getContractAt("CakeMock", cake.address) as CakeMock
 
-    for(let i = 0 ; i < 10 ; i += 10){
-        let addr = [];
-        let amounts = [];
+    let sum = BigNumber.from(0)
 
-        addr.push(deployer)
-        amounts.push(ether("10"))
+    let step = 100
+    for(let i = 0 ; i < users.length ; i += step){
 
-        for(let j = i ; j < i + 10 ; j++){
-            let user = users[j];
-            addr.push(user.address)
-            amounts.push(BigNumber.from(user.manualPayout))
-        }
-        await d.addPayouts(addr, amounts)
+        let userSlice = users.slice(i, i + step);
+        
+        let addresses = userSlice.map(x => x.address)
+        let payouts = userSlice.map(x => BigNumber.from(x.manualPayout))
+
+        let tx = await d.addPayouts(addresses, payouts)
+        await tx.wait();
 
         console.log()
-        console.log(amounts.reduce((a, b) => a + ", " + ethers.utils.formatEther(b), ""))
-        console.log(addr.reduce((a, b) => a + ", " + b))
+        // console.log(payouts.reduce((a, b) => a + ", " + ethers.utils.formatEther(b), ""))
+        // console.log(addresses.reduce((a, b) => a + ", " + b))
         console.log()
 
-        let sum = amounts.reduce((a, b) => a.add(b))
+        let sumi = payouts.reduce((a, b) => a.add(b))
+        sum = sum.add(sumi)
 
-        await cakeInstance.mint(sum)
-        await cakeInstance.transfer(d.address, sum)
+        console.log("Added " + i + " to " + (i + step))
+
     }
 
-    console.log((await cakeInstance.balanceOf(d.address)).toString())
+    // await cakeInstance.mint(sum)
+    // await cakeInstance.transfer(d.address, sum)
+
+    console.log(sum.toString())
+    // console.log((await cakeInstance.balanceOf(d.address)).toString())
 
 };
 export default func;

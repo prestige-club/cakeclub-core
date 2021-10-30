@@ -5,7 +5,7 @@ import 'hardhat-tracer'
 import "hardhat-gas-reporter"
 import 'hardhat-deploy'
 import '@nomiclabs/hardhat-ethers'
-import { projectId, mnemonics, pk } from './secrets.json'
+import { projectId, mnemonics, pk, testMnemonics } from './secrets.json'
 // import '@eth-optimism/smock/build/src/plugins/hardhat-storagelayout'
 
 task("accounts", "Prints the list of accounts", async (args, hre) => {
@@ -28,11 +28,28 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
       // }
     },
     ganache: {
-      url: "http://127.0.0.1:8545",
+      url: "http://127.0.0.1:7545",
       accounts: {
         mnemonic: mnemonics,
         count: 10
-      }
+      },
+      timeout: 200000
+    },
+    testnet: {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      chainId: 97,
+      gasPrice: 20000000000,
+      accounts: {mnemonic: mnemonics}
+    },
+    binance: {
+      url: "https://bsc-dataseed.binance.org",
+      chainId: 56,
+      accounts: {
+        mnemonic: mnemonics,
+        count: 10
+      },
+      timeout: 200000,
+      gasPrice: 5000000000
     }
   },
   solidity: {

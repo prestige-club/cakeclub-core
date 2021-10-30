@@ -38,12 +38,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  await cake["mint(address,uint256)"](deployer, ethers.utils.parseEther("1000000"))
+  let tx = await cake["mint(address,uint256)"](deployer, ethers.utils.parseEther("1000000"))
+  await tx.wait()
 
   console.log("Minted: " + ethers.utils.formatEther((await cake.balanceOf(deployer))) + " CAKE")
 
-  await cake.transferOwnership(MasterChef.address)
-  await bar.transferOwnership(MasterChef.address)
+  tx = await cake.transferOwnership(MasterChef.address)
+  await tx.wait()
+  tx = await bar.transferOwnership(MasterChef.address)
+  await tx.wait()
 
   // let chef = await ethers.getContract("MasterChef") as MasterChef
 
