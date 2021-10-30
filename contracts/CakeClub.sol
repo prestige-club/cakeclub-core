@@ -227,6 +227,7 @@ contract CakeClub is Ownable(){ //, ICakeClub
     }
 
     function setBaseRate(uint256 _baseRate) external onlyOwner {
+        require(_baseRate < 2000, "Sanity check"); //Sanity check for Baserate, can´t really be higher than 2000 with current CakeClub model
         baseRate = _baseRate;
     }
 
