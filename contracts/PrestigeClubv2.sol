@@ -484,7 +484,7 @@ contract PrestigeClub is OwnableWithSeller() {
             uint8 pool = downlineBonus[i] >> 4; // / 16
             
             user.qualifiedPools = pool;
-            for(uint8 p = 0 ; p <= pool ; p++){
+            for(uint8 p = 0 ; p < pool ; p++){
                 pools[p].numUsers++;
             }
             
