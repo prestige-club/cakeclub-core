@@ -35,9 +35,6 @@ contract CakeClub is Ownable(){ //, ICakeClub
         
         cake.approve(_vault, ~uint256(0));
         IERC20(_syrup).approve(_vault, ~uint256(0));
-
-        estimatedPeth = 1000;
-        rewardLastEstimation = 2000;
     }
 
     uint256 public alreadyWithdrawn;
@@ -45,15 +42,13 @@ contract CakeClub is Ownable(){ //, ICakeClub
     uint256 public estimatedPeth;
     uint256 public rewardLastEstimation;
 
-    uint256 constant payout_interval = 15 minutes;//1 days;
+    uint256 constant payout_interval = 1 days;
     uint256 last_payout_calculation = block.timestamp - (block.timestamp % payout_interval);
 
     uint256 dust = 100000;
 
     uint256 constant ownerShares = 15;
     uint256 public ownerProvision;
-
-    event Log(string title, uint256 value);
 
     event Withdrawal(address indexed addr, uint256 peth, uint256 cake);
 
